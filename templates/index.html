@@ -6,6 +6,7 @@
   <link rel="preconnect" href="https://unpkg.com"><link rel="preconnect" href="https://tile.openstreetmap.org">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/hospitals.css') }}">
 </head>
 <body>
   <header class="topbar"><a class="brand" href="/" aria-label="QuantumRoute home"><span class="brand-mark">Q</span><span>QUANTUM<span class="brand-light">ROUTE</span></span></a><div class="header-meta"><span class="live-dot"></span> DEMO OPERATIONS <span class="header-divider"></span><span id="updated-at">Loading status...</span></div></header>
@@ -17,6 +18,7 @@
       </section>
       <section class="data-section"><div class="section-heading"><h2>Road conditions</h2><span class="count" id="road-count">--</span></div><div class="legend" aria-label="Road status legend"><span><i class="status-dot open"></i>Open</span><span><i class="status-dot blocked"></i>Blocked</span><span><i class="status-dot risky"></i>Risky</span><span><i class="status-dot unknown"></i>Unknown</span></div><ul id="road-list" class="road-list"><li class="muted">Loading roads...</li></ul></section>
       <section class="data-section"><div class="section-heading"><h2>Flood notices</h2><span class="demo-tag">DEMO</span></div><ul id="alert-list" class="alert-list"><li class="muted">Loading notices...</li></ul></section>
+      <section class="data-section"><div class="section-heading"><h2>Hospitals by road distance</h2><span class="demo-tag">UNVERIFIED DEMO</span></div><p class="hospital-caveat">Demo points, not verified facilities or live road safety. Confirm with local emergency services.</p><ul id="hospital-list" class="hospital-list"><li class="muted">Choose a starting area...</li></ul></section>
       <section class="data-section"><div class="section-heading"><h2>Emergency shelters</h2><span class="demo-tag">DEMO</span></div><ul id="shelter-list" class="shelter-list"><li class="muted">Loading shelters...</li></ul></section>
       <details class="admin-panel"><summary>Update demo road status</summary><form id="admin-form"><label for="admin-road">Road</label><select id="admin-road" required></select><label for="admin-status">Status</label><select id="admin-status"><option value="open">Open</option><option value="blocked">Blocked</option><option value="risky">Potentially risky</option><option value="unknown">Unknown</option></select><label for="admin-reason">Reason / source</label><input id="admin-reason" maxlength="240" placeholder="Manual demo update"><label for="admin-token">Admin token</label><input id="admin-token" type="password" autocomplete="current-password" placeholder="Set in .env"><button class="secondary-button" type="submit">Save road status</button><p id="admin-message" class="form-message" aria-live="polite"></p></form></details>
       <p class="data-caveat"><strong>Demo data only.</strong> Map conditions are simulated/manual and do not confirm real-world safety. Check official local guidance.</p>

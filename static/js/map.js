@@ -5,6 +5,7 @@
   let routeLayer;
   let markersLayer;
   let routeMarkersLayer;
+  let hospitalLayer;
 
   function initialize() {
     const message = document.getElementById('map-message');
@@ -21,6 +22,7 @@
       }).on('tileload', () => message.classList.add('hidden'));
     markersLayer = L.layerGroup().addTo(map);
     routeMarkersLayer = L.layerGroup().addTo(map);
+    hospitalLayer = L.layerGroup().addTo(map);
     return true;
   }
 
@@ -35,6 +37,7 @@
     if (routeLayer) map.removeLayer(routeLayer);
     routeMarkersLayer.clearLayers();
     markersLayer.clearLayers();
+    hospitalLayer.clearLayers();
     roadLayers = roads.map((road) => L.polyline([[road.from_lat, road.from_lon], [road.to_lat, road.to_lon]], {
       color: colors[road.status], weight: 6, opacity: 0.82
     }).bindTooltip(`${road.name} · ${road.status.toUpperCase()}`).addTo(map));
@@ -45,6 +48,14 @@
     markersLayer.clearLayers();
     shelters.forEach((shelter) => L.circleMarker([shelter.lat, shelter.lon], { radius: 7, color: '#fff', weight: 2, fillColor: '#176b89', fillOpacity: 1 })
       .bindTooltip(`${shelter.name} · ${shelter.availability} · DEMO`).addTo(markersLayer));
+  }
+
+  function renderHospitals(hospitals) {
+    if (!map && !initialize()) return;
+    hospitalLayer.clearLayers();
+    hospitals.forEach((hospital) => L.marker([hospital.lat, hospital.lon], {
+      icon: L.divIcon({ className: 'hospital-marker', html: '+', iconSize: [25, 25], iconAnchor: [12, 12] })
+    }).bindTooltip(`${hospital.name} · UNVERIFIED DEMO`).addTo(hospitalLayer));
   }
 
   function renderRoute(route, locations) {
@@ -59,5 +70,5 @@
     map.fitBounds(routeLayer.getBounds(), { padding: [35, 35] });
   }
 
-  window.QuantumMap = { setCenter, renderRoads, renderShelters, renderRoute };
+  window.QuantumMap = { setCenter, renderRoads, renderShelters, renderHospitals, renderRoute };
 })();

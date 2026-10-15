@@ -43,3 +43,14 @@ def calculate_route(roads, start, destination):
         "warnings": list(dict.fromkeys(warnings)),
         "selection_reason": "Shortest weighted route found after excluding blocked roads and penalizing risky and unknown roads.",
     }
+
+
+def rank_hospital_routes(roads, hospitals, start):
+    candidates = []
+    for hospital in hospitals:
+        try:
+            route = calculate_route(roads, start, hospital["nearest_node"])
+        except (RouteNotFoundError, ValueError):
+            continue
+        candidates.append({"hospital": hospital, "route": route})
+    return sorted(candidates, key=lambda candidate: (candidate["route"]["distance_km"], candidate["route"]["estimated_minutes"]))

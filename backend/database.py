@@ -42,6 +42,13 @@ def initialize_database(database_path, sample_data_dir):
             CREATE TABLE IF NOT EXISTS regions (
                 region_id TEXT PRIMARY KEY, state_name TEXT NOT NULL, city_name TEXT NOT NULL,
                 center_lat REAL NOT NULL, center_lon REAL NOT NULL, source TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS areas (
+                area_id TEXT PRIMARY KEY, region_id TEXT NOT NULL, name TEXT NOT NULL,
+                lat REAL NOT NULL, lon REAL NOT NULL, nearest_node TEXT NOT NULL, source TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS hospitals (
+                hospital_id TEXT PRIMARY KEY, region_id TEXT NOT NULL, name TEXT NOT NULL,
+                nearest_node TEXT NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL,
+                availability TEXT NOT NULL, source TEXT NOT NULL);
         """)
         for table in ("roads", "alerts", "shelters"):
             columns = {row["name"] for row in db.execute(f"PRAGMA table_info({table})")}
@@ -67,7 +74,19 @@ def initialize_database(database_path, sample_data_dir):
                     db.executemany(statement, records)
         for network in regional_data["networks"]:
             for table, (_, statement) in samples.items():
-                if db.execute(f"SELECT COUNT(*) FROM {table} WHERE region_id=?", (network["region_id"],)).fetchone()[0] == 0:
-                    records = [{**record, "region_id": network["region_id"]} for record in network[table]]
-                    db.executemany(statement, records)
+                records = [{**record, "region_id": network["region_id"]} for record in network[table]]
+                db.executemany(statement, records)
+
+        with open(os.path.join(sample_data_dir, "sample_patna_roads.json"), encoding="utf-8") as sample:
+            patna_roads = [{**road, "region_id": "bihar"} for road in json.load(sample)["roads"]]
+        db.executemany(samples["roads"][1], patna_roads)
+        for filename, key, table in (
+            ("sample_patna_areas.json", "areas", "areas"),
+            ("sample_hospitals.json", "hospitals", "hospitals"),
+        ):
+            with open(os.path.join(sample_data_dir, filename), encoding="utf-8") as sample:
+                records = json.load(sample)[key]
+            columns = ",".join(records[0])
+            values = ",".join(f":{column}" for column in records[0])
+            db.executemany(f"INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})", records)
         db.commit()

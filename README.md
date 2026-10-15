@@ -4,6 +4,8 @@ Software-only evacuation route-planning demo: Flask API, SQLite status database,
 
 The state/city selector includes simulated networks for Pune (Maharashtra), Patna (Bihar), Lucknow (Uttar Pradesh), and Kolkata (West Bengal). Each selection has its own demo roads, notices, shelters, and isolated route graph.
 
+Patna additionally includes 14 approximate area points and six simulated hospital points. Hospital routes are ranked by modeled road-network distance from the selected area and exclude blocked links. These are not verified hospital listings, live availability, real road geometry, or a safety guarantee; the UI labels them as unverified demo points.
+
 **Safety/data limits:** road statuses, alerts, and shelters are simulated demo records, not current real-world reports or safety advice. Unknown roads are not confirmed safe. The local API and graph work without internet; Leaflet, fonts, and OpenStreetMap basemap tiles need internet.
 
 ## Run on macOS
@@ -31,6 +33,7 @@ Open http://127.0.0.1:5000. SQLite and sample records are initialized automatica
 
 - `GET /api/regions` lists available demo networks.
 - `GET /api/roads`, `/api/locations`, `/api/alerts`, `/api/shelters` accept optional `?region_id=bihar` (defaults to `pune`).
+- `GET /api/hospitals/routes?region_id=bihar&start=patna_junction` ranks reachable demo hospital points by road distance.
 - `POST /api/route/calculate` accepts `{"region_id":"bihar","start":"patna_central","destination":"patna_south"}`.
 - `POST /api/admin/roads/status` requires `X-Admin-Token`; JSON fields: `road_id`, `status` (`open`, `blocked`, `risky`, or `unknown`), `reason`, optional `source`.
 

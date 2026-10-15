@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 
 from backend.database import connect_db, initialize_database
-from backend.route_engine import RouteNotFoundError, calculate_route
+from backend.route_engine import RouteNotFoundError, calculate_route, rank_hospital_routes
 
 load_dotenv()
 
@@ -51,12 +51,33 @@ def create_app(test_config=None):
             if not region:
                 return jsonify(error="Unknown demo region."), 404
             rows = db.execute("SELECT * FROM roads WHERE region_id=?", (region_id,)).fetchall()
+            area_names = {
+                row["nearest_node"]: row["name"]
+                for row in db.execute("SELECT nearest_node,name FROM areas WHERE region_id=?", (region_id,))
+            }
         nodes = {}
         for row in rows:
             for side in ("from", "to"):
                 node = row[f"{side}_node"]
-                nodes[node] = {"id": node, "name": node.replace("_", " ").title(), "lat": row[f"{side}_lat"], "lon": row[f"{side}_lon"]}
+                nodes[node] = {"id": node, "name": area_names.get(node, node.replace("_", " ").title()), "lat": row[f"{side}_lat"], "lon": row[f"{side}_lon"]}
         return jsonify(locations=list(nodes.values()))
+
+    @app.get("/api/hospitals/routes")
+    def hospital_routes():
+        region_id = request.args.get("region_id", "pune")
+        start = request.args.get("start", "")
+        if not start:
+            return jsonify(error="Choose a starting area first."), 400
+        with connect_db(app.config["DATABASE_PATH"]) as db:
+            if not db.execute("SELECT 1 FROM regions WHERE region_id=?", (region_id,)).fetchone():
+                return jsonify(error="Unknown demo region."), 404
+            roads_data = [dict(row) for row in db.execute("SELECT * FROM roads WHERE region_id=?", (region_id,))]
+            hospitals = [dict(row) for row in db.execute("SELECT * FROM hospitals WHERE region_id=?", (region_id,))]
+        try:
+            candidates = rank_hospital_routes(roads_data, hospitals, start)
+        except ValueError as error:
+            return jsonify(error=str(error)), 400
+        return jsonify(hospitals=candidates, region_id=region_id, data_notice="Hospitals and road statuses are simulated and unverified.")
 
     @app.get("/api/alerts")
     def alerts():

@@ -3,6 +3,7 @@
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
   let roads = [];
   let locations = [];
+  let hospitalCandidates = [];
   let selectedRegion = 'pune';
 
   async function getJson(url, options) {
@@ -45,6 +46,23 @@
     window.QuantumMap.renderShelters(shelters);
   }
 
+  function renderHospitals(candidates) {
+    hospitalCandidates = candidates;
+    $('#hospital-list').innerHTML = candidates.length ? candidates.map((candidate, index) => `
+      <li><button class="hospital-choice${index === 0 ? ' nearest' : ''}" type="button" data-hospital-index="${index}">
+        <span><strong>${index === 0 ? 'NEAREST · ' : ''}${escapeHtml(candidate.hospital.name)}</strong>
+        <small>Unverified demo point · about ${escapeHtml(candidate.route.estimated_minutes)} min</small></span>
+        <span class="hospital-distance">${escapeHtml(candidate.route.distance_km)} km</span>
+      </button></li>`).join('') : '<li class="muted">No reachable demo hospital route in this network.</li>';
+    window.QuantumMap.renderHospitals(candidates.map((candidate) => candidate.hospital));
+  }
+
+  async function loadHospitalRoutes() {
+    const query = new URLSearchParams({ region_id: selectedRegion, start: $('#start').value });
+    const data = await getJson(`/api/hospitals/routes?${query}`);
+    renderHospitals(data.hospitals);
+  }
+
   $('#route-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const result = $('#route-result');
@@ -77,6 +95,24 @@
     }
   });
 
+  $('#hospital-list').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-hospital-index]');
+    if (!button) return;
+    const candidate = hospitalCandidates[Number(button.dataset.hospitalIndex)];
+    const result = $('#route-result');
+    result.classList.remove('error');
+    result.innerHTML = `<strong>${escapeHtml(candidate.hospital.name)} · ${escapeHtml(candidate.route.distance_km)} km · about ${escapeHtml(candidate.route.estimated_minutes)} min</strong><br>Shortest modeled road route. Hospital location is unverified demo data.${candidate.route.warnings.map((warning) => `<span class="warning">${escapeHtml(warning)}</span>`).join('')}`;
+    window.QuantumMap.renderRoute(candidate.route, [{ id: candidate.hospital.nearest_node, name: candidate.hospital.name, lat: candidate.hospital.lat, lon: candidate.hospital.lon }, ...locations]);
+  });
+
+  $('#start').addEventListener('change', async () => {
+    try {
+      await loadHospitalRoutes();
+    } catch (error) {
+      $('#hospital-list').textContent = error.message;
+    }
+  });
+
   async function loadRegion(region) {
     selectedRegion = region.region_id;
     $('#map-region').textContent = `${region.city_name} · ${region.state_name}`;
@@ -91,6 +127,11 @@
     renderLocations(shelterData.shelters);
     renderAlerts(alertData.alerts);
     renderShelters(shelterData.shelters);
+    try {
+      await loadHospitalRoutes();
+    } catch (error) {
+      $('#hospital-list').textContent = error.message;
+    }
     $('#route-form').requestSubmit();
   }
 

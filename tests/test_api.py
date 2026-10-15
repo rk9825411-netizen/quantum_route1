@@ -49,6 +49,22 @@ def test_route_is_limited_to_selected_region(tmp_path):
     assert cross_region.status_code == 400
 
 
+def test_patna_areas_and_hospital_routes_are_ranked(tmp_path):
+    client = make_client(tmp_path)
+    locations = client.get("/api/locations?region_id=bihar").get_json()["locations"]
+    assert len(locations) >= 14
+    assert any(location["name"] == "Kankarbagh" for location in locations)
+
+    response = client.get("/api/hospitals/routes?region_id=bihar&start=patna_junction")
+    assert response.status_code == 200
+    hospitals = response.get_json()["hospitals"]
+    assert len(hospitals) == 6
+    distances = [entry["route"]["distance_km"] for entry in hospitals]
+    assert distances == sorted(distances)
+    assert hospitals[0]["hospital"]["name"].startswith("Demo Hospital")
+    assert all(road["status"] != "blocked" for entry in hospitals for road in entry["route"]["roads"])
+
+
 def test_admin_requires_token_and_updates_database(tmp_path):
     client = make_client(tmp_path)
     payload = {"road_id": "R-01", "status": "blocked", "reason": "Test closure"}

@@ -1,0 +1,8 @@
+{"hospitals":[
+  {"hospital_id":"PAT-H01","region_id":"bihar","name":"Demo Hospital - Central Patna","nearest_node":"patna_central","lat":25.613,"lon":85.14,"availability":"unverified","source":"Simulated demo point; not a verified facility"},
+  {"hospital_id":"PAT-H02","region_id":"bihar","name":"Demo Hospital - Kankarbagh","nearest_node":"patna_kankarbagh","lat":25.595,"lon":85.158,"availability":"unverified","source":"Simulated demo point; not a verified facility"},
+  {"hospital_id":"PAT-H03","region_id":"bihar","name":"Demo Hospital - Rajendra Nagar","nearest_node":"patna_rajendra_nagar","lat":25.609,"lon":85.16,"availability":"unverified","source":"Simulated demo point; not a verified facility"},
+  {"hospital_id":"PAT-H04","region_id":"bihar","name":"Demo Hospital - Patliputra","nearest_node":"patna_patliputra","lat":25.635,"lon":85.103,"availability":"unverified","source":"Simulated demo point; not a verified facility"},
+  {"hospital_id":"PAT-H05","region_id":"bihar","name":"Demo Hospital - Danapur","nearest_node":"patna_danapur","lat":25.622,"lon":85.042,"availability":"unverified","source":"Simulated demo point; not a verified facility"},
+  {"hospital_id":"PAT-H06","region_id":"bihar","name":"Demo Hospital - Phulwari Sharif","nearest_node":"patna_phulwari","lat":25.576,"lon":85.089,"availability":"unverified","source":"Simulated demo point; not a verified facility"}
+]}

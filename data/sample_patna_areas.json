@@ -1,0 +1,16 @@
+{"areas":[
+  {"area_id":"patna_central_area","region_id":"bihar","name":"Gandhi Maidan / Central Patna","lat":25.612,"lon":85.1376,"nearest_node":"patna_central","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_junction_area","region_id":"bihar","name":"Patna Junction","lat":25.609,"lon":85.141,"nearest_node":"patna_junction","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_kankarbagh_area","region_id":"bihar","name":"Kankarbagh","lat":25.594,"lon":85.157,"nearest_node":"patna_kankarbagh","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_rajendra_area","region_id":"bihar","name":"Rajendra Nagar","lat":25.608,"lon":85.159,"nearest_node":"patna_rajendra_nagar","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_boring_area","region_id":"bihar","name":"Boring Road","lat":25.606,"lon":85.11,"nearest_node":"patna_boring_road","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_patliputra_area","region_id":"bihar","name":"Patliputra","lat":25.634,"lon":85.102,"nearest_node":"patna_patliputra","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_digha_area","region_id":"bihar","name":"Digha","lat":25.65,"lon":85.09,"nearest_node":"patna_digha","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_danapur_area","region_id":"bihar","name":"Danapur","lat":25.621,"lon":85.041,"nearest_node":"patna_danapur","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_phulwari_area","region_id":"bihar","name":"Phulwari Sharif","lat":25.575,"lon":85.088,"nearest_node":"patna_phulwari","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_agam_area","region_id":"bihar","name":"Agam Kuan","lat":25.62,"lon":85.17,"nearest_node":"patna_agam_kuan","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_north_area","region_id":"bihar","name":"North Patna","lat":25.624,"lon":85.137,"nearest_node":"patna_north","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_east_area","region_id":"bihar","name":"East Patna","lat":25.617,"lon":85.153,"nearest_node":"patna_east","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_west_area","region_id":"bihar","name":"West Patna","lat":25.604,"lon":85.123,"nearest_node":"patna_west","source":"Approximate demo area point; not navigation-grade"},
+  {"area_id":"patna_south_area","region_id":"bihar","name":"South Patna","lat":25.597,"lon":85.14,"nearest_node":"patna_south","source":"Approximate demo area point; not navigation-grade"}
+]}
