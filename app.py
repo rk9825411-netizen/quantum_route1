@@ -27,16 +27,30 @@ def create_app(test_config=None):
     def index():
         return render_template("index.html")
 
+    @app.get("/api/regions")
+    def regions():
+        with connect_db(app.config["DATABASE_PATH"]) as db:
+            items = [dict(row) for row in db.execute("SELECT * FROM regions ORDER BY state_name")]
+        return jsonify(regions=items)
+
     @app.get("/api/roads")
     def roads():
+        region_id = request.args.get("region_id", "pune")
         with connect_db(app.config["DATABASE_PATH"]) as db:
-            items = [dict(row) for row in db.execute("SELECT * FROM roads ORDER BY road_id")]
-        return jsonify(roads=items, data_mode="demo/manual")
+            region = db.execute("SELECT * FROM regions WHERE region_id=?", (region_id,)).fetchone()
+            if not region:
+                return jsonify(error="Unknown demo region."), 404
+            items = [dict(row) for row in db.execute("SELECT * FROM roads WHERE region_id=? ORDER BY road_id", (region_id,))]
+        return jsonify(roads=items, region=dict(region), data_mode="demo/manual")
 
     @app.get("/api/locations")
     def locations():
+        region_id = request.args.get("region_id", "pune")
         with connect_db(app.config["DATABASE_PATH"]) as db:
-            rows = db.execute("SELECT * FROM roads").fetchall()
+            region = db.execute("SELECT region_id FROM regions WHERE region_id=?", (region_id,)).fetchone()
+            if not region:
+                return jsonify(error="Unknown demo region."), 404
+            rows = db.execute("SELECT * FROM roads WHERE region_id=?", (region_id,)).fetchall()
         nodes = {}
         for row in rows:
             for side in ("from", "to"):
@@ -46,26 +60,40 @@ def create_app(test_config=None):
 
     @app.get("/api/alerts")
     def alerts():
+        region_id = request.args.get("region_id", "pune")
         with connect_db(app.config["DATABASE_PATH"]) as db:
-            rows = [dict(row) for row in db.execute("SELECT * FROM alerts ORDER BY updated_at DESC")]
+            region = db.execute("SELECT region_id FROM regions WHERE region_id=?", (region_id,)).fetchone()
+            if not region:
+                return jsonify(error="Unknown demo region."), 404
+            rows = [dict(row) for row in db.execute("SELECT * FROM alerts WHERE region_id=? ORDER BY updated_at DESC", (region_id,))]
         return jsonify(alerts=rows)
 
     @app.get("/api/shelters")
     def shelters():
+        region_id = request.args.get("region_id", "pune")
         with connect_db(app.config["DATABASE_PATH"]) as db:
-            rows = [dict(row) for row in db.execute("SELECT * FROM shelters ORDER BY name")]
+            region = db.execute("SELECT region_id FROM regions WHERE region_id=?", (region_id,)).fetchone()
+            if not region:
+                return jsonify(error="Unknown demo region."), 404
+            rows = [dict(row) for row in db.execute("SELECT * FROM shelters WHERE region_id=? ORDER BY name", (region_id,))]
         return jsonify(shelters=rows)
 
     @app.post("/api/route/calculate")
     def route():
         payload = request.get_json(silent=True) or {}
         start, destination = payload.get("start"), payload.get("destination")
+        region_id = payload.get("region_id", "pune")
         if not isinstance(start, str) or not isinstance(destination, str) or not start or not destination:
             return jsonify(error="Choose both a starting point and a destination."), 400
+        if not isinstance(region_id, str):
+            return jsonify(error="Choose a valid demo region."), 400
         if start == destination:
             return jsonify(error="Starting point and destination must be different."), 400
         with connect_db(app.config["DATABASE_PATH"]) as db:
-            roads_data = [dict(row) for row in db.execute("SELECT * FROM roads")]
+            region = db.execute("SELECT region_id FROM regions WHERE region_id=?", (region_id,)).fetchone()
+            if not region:
+                return jsonify(error="Unknown demo region."), 404
+            roads_data = [dict(row) for row in db.execute("SELECT * FROM roads WHERE region_id=?", (region_id,))]
         try:
             return jsonify(calculate_route(roads_data, start, destination))
         except RouteNotFoundError as error:

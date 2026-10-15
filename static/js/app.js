@@ -3,6 +3,7 @@
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
   let roads = [];
   let locations = [];
+  let selectedRegion = 'pune';
 
   async function getJson(url, options) {
     const response = await fetch(url, options);
@@ -31,8 +32,8 @@
     }).join('');
     $('#start').innerHTML = options;
     $('#destination').innerHTML = `<optgroup label="Road network">${options}</optgroup><optgroup label="Emergency shelters">${shelterOptions}</optgroup>`;
-    $('#start').value = 'old_market';
-    $('#destination').value = locations.find((location) => location.id === 'south_hub')?.id || locations[0]?.id;
+    $('#start').value = locations[0]?.id || '';
+    $('#destination').value = locations[locations.length - 1]?.id || '';
   }
 
   function renderAlerts(alerts) {
@@ -50,7 +51,7 @@
     result.classList.remove('error');
     result.textContent = 'Calculating route...';
     try {
-      const route = await getJson('/api/route/calculate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ start: $('#start').value, destination: $('#destination').value }) });
+      const route = await getJson('/api/route/calculate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ region_id: selectedRegion, start: $('#start').value, destination: $('#destination').value }) });
       result.innerHTML = `<strong>${escapeHtml(route.distance_km)} km · about ${escapeHtml(route.estimated_minutes)} min</strong><br>${escapeHtml(route.selection_reason)}${route.warnings.map((warning) => `<span class="warning">${escapeHtml(warning)}</span>`).join('')}`;
       window.QuantumMap.renderRoute(route, locations);
     } catch (error) {
@@ -76,16 +77,43 @@
     }
   });
 
+  async function loadRegion(region) {
+    selectedRegion = region.region_id;
+    $('#map-region').textContent = `${region.city_name} · ${region.state_name}`;
+    window.QuantumMap.setCenter(region);
+    const query = `?region_id=${encodeURIComponent(selectedRegion)}`;
+    const [roadData, locationData, alertData, shelterData] = await Promise.all([
+      getJson(`/api/roads${query}`), getJson(`/api/locations${query}`), getJson(`/api/alerts${query}`), getJson(`/api/shelters${query}`)
+    ]);
+    roads = roadData.roads;
+    locations = locationData.locations;
+    renderRoads();
+    renderLocations(shelterData.shelters);
+    renderAlerts(alertData.alerts);
+    renderShelters(shelterData.shelters);
+    $('#route-form').requestSubmit();
+  }
+
+  $('#region').addEventListener('change', async (event) => {
+    const region = JSON.parse(event.target.selectedOptions[0].dataset.region);
+    const result = $('#route-result');
+    result.classList.remove('error');
+    result.textContent = 'Loading demo network...';
+    try {
+      await loadRegion(region);
+    } catch (error) {
+      result.classList.add('error');
+      result.textContent = `Could not load this region: ${error.message}`;
+    }
+  });
+
   async function loadDashboard() {
     try {
-      const [roadData, locationData, alertData, shelterData] = await Promise.all([getJson('/api/roads'), getJson('/api/locations'), getJson('/api/alerts'), getJson('/api/shelters')]);
-      roads = roadData.roads;
-      locations = locationData.locations;
-      renderRoads();
-      renderLocations(shelterData.shelters);
-      renderAlerts(alertData.alerts);
-      renderShelters(shelterData.shelters);
-      $('#route-form').requestSubmit();
+      const data = await getJson('/api/regions');
+      $('#region').innerHTML = data.regions.map((region) => `<option value="${escapeHtml(region.region_id)}" data-region="${escapeHtml(JSON.stringify(region))}">${escapeHtml(region.state_name)} · ${escapeHtml(region.city_name)}</option>`).join('');
+      const region = data.regions.find((item) => item.region_id === 'pune') || data.regions[0];
+      $('#region').value = region.region_id;
+      await loadRegion(region);
     } catch (error) {
       $('#route-result').classList.add('error');
       $('#route-result').textContent = `Could not load dashboard data: ${error.message}`;

@@ -17,6 +17,38 @@ def test_seeded_api_and_route(tmp_path):
     assert "south_hub" in response.get_json()["nodes"]
 
 
+def test_regions_are_listed_and_roads_are_filtered(tmp_path):
+    client = make_client(tmp_path)
+    regions = client.get("/api/regions").get_json()["regions"]
+    assert {(region["state_name"], region["city_name"]) for region in regions} == {
+        ("Maharashtra", "Pune"),
+        ("Bihar", "Patna"),
+        ("Uttar Pradesh", "Lucknow"),
+        ("West Bengal", "Kolkata"),
+    }
+    roads = client.get("/api/roads?region_id=bihar").get_json()["roads"]
+    assert roads
+    assert all(road["region_id"] == "bihar" for road in roads)
+
+
+def test_route_is_limited_to_selected_region(tmp_path):
+    client = make_client(tmp_path)
+    response = client.post("/api/route/calculate", json={
+        "region_id": "bihar",
+        "start": "patna_central",
+        "destination": "patna_south",
+    })
+    assert response.status_code == 200
+    assert all(road["road_id"].startswith("BR-") for road in response.get_json()["roads"])
+
+    cross_region = client.post("/api/route/calculate", json={
+        "region_id": "bihar",
+        "start": "lucknow_central",
+        "destination": "patna_south",
+    })
+    assert cross_region.status_code == 400
+
+
 def test_admin_requires_token_and_updates_database(tmp_path):
     client = make_client(tmp_path)
     payload = {"road_id": "R-01", "status": "blocked", "reason": "Test closure"}
