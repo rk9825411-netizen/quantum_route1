@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102923">
+  <title>QuantumRoute | Evacuation routing demo</title>
+  <link rel="preconnect" href="https://unpkg.com"><link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/" aria-label="QuantumRoute home"><span class="brand-mark">Q</span><span>QUANTUM<span class="brand-light">ROUTE</span></span></a><div class="header-meta"><span class="live-dot"></span> DEMO OPERATIONS <span class="header-divider"></span><span id="updated-at">Loading status...</span></div></header>
+  <main class="workspace">
+    <aside class="sidebar">
+      <section class="route-section"><div class="eyebrow">EVACUATION PLANNER <span>01 / ROUTE</span></div><h1>Find a route<br>around disruption.</h1><p class="intro">Plan against the road reports currently in this demo network.</p>
+        <form id="route-form"><label for="start">Starting point</label><select id="start" name="start" required></select><label for="destination">Destination</label><select id="destination" name="destination" required></select><button class="primary-button" type="submit"><span>Calculate route</span><span aria-hidden="true">↗</span></button></form>
+        <div id="route-result" class="route-result" aria-live="polite">Choose two locations to calculate a road-aware route.</div>
+      </section>
+      <section class="data-section"><div class="section-heading"><h2>Road conditions</h2><span class="count" id="road-count">--</span></div><div class="legend" aria-label="Road status legend"><span><i class="status-dot open"></i>Open</span><span><i class="status-dot blocked"></i>Blocked</span><span><i class="status-dot risky"></i>Risky</span><span><i class="status-dot unknown"></i>Unknown</span></div><ul id="road-list" class="road-list"><li class="muted">Loading roads...</li></ul></section>
+      <section class="data-section"><div class="section-heading"><h2>Flood notices</h2><span class="demo-tag">DEMO</span></div><ul id="alert-list" class="alert-list"><li class="muted">Loading notices...</li></ul></section>
+      <section class="data-section"><div class="section-heading"><h2>Emergency shelters</h2><span class="demo-tag">DEMO</span></div><ul id="shelter-list" class="shelter-list"><li class="muted">Loading shelters...</li></ul></section>
+      <details class="admin-panel"><summary>Update demo road status</summary><form id="admin-form"><label for="admin-road">Road</label><select id="admin-road" required></select><label for="admin-status">Status</label><select id="admin-status"><option value="open">Open</option><option value="blocked">Blocked</option><option value="risky">Potentially risky</option><option value="unknown">Unknown</option></select><label for="admin-reason">Reason / source</label><input id="admin-reason" maxlength="240" placeholder="Manual demo update"><label for="admin-token">Admin token</label><input id="admin-token" type="password" autocomplete="current-password" placeholder="Set in .env"><button class="secondary-button" type="submit">Save road status</button><p id="admin-message" class="form-message" aria-live="polite"></p></form></details>
+      <p class="data-caveat"><strong>Demo data only.</strong> Map conditions are simulated/manual and do not confirm real-world safety. Check official local guidance.</p>
+    </aside>
+    <section class="map-column" aria-label="Road map and route"><div class="map-toolbar"><div><span class="map-kicker">NETWORK VIEW</span><strong>Demo City · Pune region</strong></div><span class="source-pill"><i></i> SIMULATED / MANUAL DATA</span></div><div id="map" role="application" aria-label="Interactive road status map"></div><div id="map-message" class="map-message" role="status">Loading map tiles. Internet access is needed for the street basemap.</div><div class="map-footer"><span>Basemap © OpenStreetMap contributors</span><span>Road data: local demo database</span></div></section>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><script src="{{ url_for('static', filename='js/map.js') }}"></script><script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
